@@ -50,6 +50,15 @@ pipeline {
                 }
             }
         }
+        stage("Docker Build") {
+          steps {
+            script {
+               echo '<--------------- Docker Build Started --------------->'
+               app = docker.build(imageName)
+               echo '<--------------- Docker Build Ends --------------->'
+            }
+          }
+        }
         
 
     }
