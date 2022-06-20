@@ -1,5 +1,5 @@
-def imageName = 'stalin.jfrog.io/default-docker-local/valaxy-rtp'
-def registry  = 'https://stalin.jfrog.io'
+def imageName = 'chinar.jfrog.io/default-docker-local/valaxy-rtp'
+def registry  = 'https://chinar.jfrog.io'
 def version   = '1.0.3'
 def app
 pipeline {
@@ -56,6 +56,30 @@ pipeline {
                echo '<--------------- Docker Build Started --------------->'
                app = docker.build(imageName)
                echo '<--------------- Docker Build Ends --------------->'
+            }
+          }
+        }
+        stage("Jar Publish") {
+          steps {
+            script {
+              echo '<--------------- Jar Publish Started --------------->'
+                def server = Artifactory.newServer url:registry+"/artifactory" ,  credentialsId:"artifactorycredentialid"
+                 def properties = "buildid=${env.BUILD_ID},commitid=${GIT_COMMIT}";
+                 def uploadSpec = """{
+                      "files": [
+                        {
+                          "pattern": "jarstaging/(*)",
+                          "target": "default-maven-local/{1}",
+                          "flat": "false",
+                          "props" : "${properties}",
+                          "exclusions": [ "*.sha1", "*.md5"]
+                        }
+                     ]
+                 }"""
+                 def buildInfo = server.upload(uploadSpec)
+                 buildInfo.env.collect()
+                 server.publishBuildInfo(buildInfo)
+              echo '<--------------- Jar Publish Ended --------------->'
             }
           }
         }
