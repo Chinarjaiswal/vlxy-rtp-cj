@@ -1,6 +1,6 @@
 def imageName = 'chinar.jfrog.io/default-docker-local/valaxy-rtp'
 def registry  = 'https://chinar.jfrog.io'
-def version   = '1.0.3'
+def version   = '1.0.0'
 def app
 pipeline {
     agent {
@@ -80,6 +80,17 @@ pipeline {
                  buildInfo.env.collect()
                  server.publishBuildInfo(buildInfo)
               echo '<--------------- Jar Publish Ended --------------->'
+            }
+          }
+        }
+        stage("Docker Publish") {
+          steps {
+            script {
+               echo '<--------------- Docker Publish Started --------------->'
+               docker.withRegistry(registry, 'artifactorycredentialid'){
+                 docker.image(imageName).push(version)
+               }
+               echo '<--------------- Docker Publish Ends --------------->'
             }
           }
         }
